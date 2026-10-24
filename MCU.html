@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Marvel Universe Watchlist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        marvel: {
+                            red: '#e62429',
+                            darkRed: '#991115',
+                            gold: '#f39c12',
+                            blue: '#00a8ff',
+                            purple: '#9b59b6',
+                            darkBg: '#0b0c10',
+                            cardBg: '#151821',
+                            border: '#232733'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0b0c10;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0c10;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #232733;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #e62429;
+        }
+
+        /* Checkbox styling */
+        .custom-checkbox {
+            appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #4b5563;
+            border-radius: 0.375rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .custom-checkbox:checked {
+            background-color: #e62429;
+            border-color: #e62429;
+        }
+
+        .custom-checkbox:checked::after {
+            content: '\f00c';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: white;
+            font-size: 0.75rem;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* Card styles */
+        .item-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+            border-color: #374151;
+        }
+
+        .item-card.watched {
+            background-color: rgba(21, 24, 33, 0.4);
+            border-color: rgba(230, 36, 41, 0.25);
+        }
+
+        .tab-btn.active {
+            background-color: #e62429;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(230, 36, 41, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen pb-16">
+
+    <!-- Header Section -->
+    <header class="sticky top-0 z-50 bg-marvel-darkBg/95 backdrop-blur-md border-b border-marvel-border px-4 py-4 mb-6 shadow-xl">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="bg-marvel-red text-white font-black px-3 py-1 rounded tracking-tighter text-2xl shadow-lg shadow-marvel-red/30">
+                    MARVEL
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-white flex items-center gap-2">
+                        Multiverse Watchlist
+                    </h1>
+                    <p class="text-xs text-gray-400">MCU, X-Men, Spider-Verse, Fantastic Four & Legacy Classics</p>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <button onclick="exportData()" class="flex items-center gap-2 text-xs bg-marvel-cardBg hover:bg-marvel-border text-gray-200 px-3.5 py-2 rounded-lg border border-marvel-border transition shadow-sm font-medium">
+                    <i class="fa-solid fa-download text-marvel-gold"></i> Export JSON
+                </button>
+                
+                <label class="flex items-center gap-2 text-xs bg-marvel-cardBg hover:bg-marvel-border text-gray-200 px-3.5 py-2 rounded-lg border border-marvel-border transition cursor-pointer shadow-sm font-medium">
+                    <i class="fa-solid fa-upload text-marvel-blue"></i> Import JSON
+                    <input type="file" id="importFile" accept=".json" class="hidden" onchange="importData(event)">
+                </label>
+
+                <button onclick="confirmReset()" class="flex items-center gap-2 text-xs bg-marvel-cardBg hover:bg-red-950/50 text-red-400 hover:text-red-300 px-3.5 py-2 rounded-lg border border-marvel-border hover:border-red-800 transition shadow-sm font-medium">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4">
+
+        <!-- Master Overall Dashboard -->
+        <section class="bg-marvel-cardBg border border-marvel-border rounded-xl p-6 mb-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-marvel-red/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-marvel-gold"></i> Overall Multiverse Progress
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-1" id="statsSubtitle">0 of 0 items watched</p>
+                </div>
+                <div class="text-right flex items-baseline gap-1">
+                    <span id="percentText" class="text-3xl font-black text-white">0%</span>
+                    <span class="text-xs text-gray-400 font-medium">Completed</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full h-3.5 bg-marvel-border rounded-full overflow-hidden p-0.5 mb-6">
+                <div id="progressBar" class="h-full bg-gradient-to-r from-marvel-darkRed via-marvel-red to-marvel-gold rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+
+            <!-- Breakdown Per Category -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-center">
+                <div class="bg-marvel-darkBg/80 p-3 rounded-lg border border-marvel-border">
+                    <div class="text-[11px] font-semibold text-red-400 uppercase tracking-wider">MCU</div>
+                    <div class="text-sm font-bold text-gray-100 mt-1" id="statMCU">0 / 0</div>
+                </div>
+                <div class="bg-marvel-darkBg/80 p-3 rounded-lg border border-marvel-border">
+                    <div class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">X-Men</div>
+                    <div class="text-sm font-bold text-gray-100 mt-1" id="statXMen">0 / 0</div>
+                </div>
+                <div class="bg-marvel-darkBg/80 p-3 rounded-lg border border-marvel-border">
+                    <div class="text-[11px] font-semibold text-blue-400 uppercase tracking-wider">Spider-Verse / SSU</div>
+                    <div class="text-sm font-bold text-gray-100 mt-1" id="statSpider">0 / 0</div>
+                </div>
+                <div class="bg-marvel-darkBg/80 p-3 rounded-lg border border-marvel-border">
+                    <div class="text-[11px] font-semibold text-purple-400 uppercase tracking-wider">Fantastic Four</div>
+                    <div class="text-sm font-bold text-gray-100 mt-1" id="statF4">0 / 0</div>
+                </div>
+                <div class="bg-marvel-darkBg/80 p-3 rounded-lg border border-marvel-border col-span-2 sm:col-span-1">
+                    <div class="text-[11px] font-semibold text-emerald-400 uppercase tracking-wider">Legacy Classics</div>
+                    <div class="text-sm font-bold text-gray-100 mt-1" id="statLegacy">0 / 0</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Franchise Navigation Tabs -->
+        <section class="flex flex-wrap gap-2 mb-6 border-b border-marvel-border pb-4">
+            <button onclick="setFranchise('all')" id="tab-all" class="tab-btn active px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-300 hover:text-white bg-marvel-cardBg border border-marvel-border">
+                <i class="fa-solid fa-layer-group mr-1.5"></i> All Marvel
+            </button>
+            <button onclick="setFranchise('MCU')" id="tab-MCU" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-300 hover:text-white bg-marvel-cardBg border border-marvel-border">
+                <i class="fa-solid fa-shield-halved mr-1.5 text-red-500"></i> MCU
+            </button>
+            <button onclick="setFranchise('X-Men')" id="tab-X-Men" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-300 hover:text-white bg-marvel-cardBg border border-marvel-border">
+                <i class="fa-solid fa-dna mr-1.5 text-amber-500"></i> X-Men
+            </button>
+            <button onclick="setFranchise('Spider-Verse / SSU')" id="tab-Spider-Verse / SSU" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-300 hover:text-white bg-marvel-cardBg border border-marvel-border">
+                <i class="fa-solid fa-spider mr-1.5 text-blue-500"></i> Spider-Verse & SSU
+            </button>
+            <button onclick="setFranchise('Fantastic Four')" id="tab-Fantastic Four" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-300 hover:text-white bg-marvel-cardBg border border-marvel-border">
+                <i class="fa-solid fa-burst mr-1.5 text-purple-500"></i> Fantastic Four
+            </button>
+            <button onclick="setFranchise('Legacy Marvel')" id="tab-Legacy Marvel" class="tab-btn px-4 py-2 rounded-lg text-xs font-bold transition-all text-gray-300 hover:text-white bg-marvel-cardBg border border-marvel-border">
+                <i class="fa-solid fa-skull mr-1.5 text-emerald-500"></i> Legacy Classics
+            </button>
+        </section>
+
+        <!-- Search & Watch Status Controls -->
+        <section class="flex flex-col md:flex-row gap-4 mb-6 justify-between items-center">
+            <!-- Search Input -->
+            <div class="relative w-full md:w-80">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="Search by title, character, or year..." 
+                    oninput="handleSearch()"
+                    class="w-full pl-9 pr-4 py-2 bg-marvel-cardBg border border-marvel-border rounded-lg text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-marvel-red transition"
+                >
+            </div>
+
+            <!-- Filter Buttons & Batch Selection Controls -->
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto justify-center">
+                <!-- Status Filter Group -->
+                <div class="flex items-center gap-1 bg-marvel-cardBg p-1 border border-marvel-border rounded-lg">
+                    <button onclick="setFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-md text-xs font-medium transition bg-marvel-red text-white">All</button>
+                    <button onclick="setFilter('unwatched')" id="filter-unwatched" class="px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white transition">Unwatched</button>
+                    <button onclick="setFilter('watched')" id="filter-watched" class="px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white transition">Watched</button>
+                </div>
+
+                <!-- Batch Actions -->
+                <div class="flex items-center gap-1 bg-marvel-cardBg p-1 border border-marvel-border rounded-lg">
+                    <button onclick="selectAllVisible(true)" title="Check all displayed titles" class="px-3 py-1.5 rounded-md text-xs font-medium text-emerald-400 hover:bg-emerald-950/40 hover:text-emerald-300 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-check-double"></i> Select All
+                    </button>
+                    <button onclick="selectAllVisible(false)" title="Uncheck all displayed titles" class="px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:bg-gray-800 hover:text-gray-200 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-square-minus"></i> Unselect All
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Checklist Grid -->
+        <section id="checklistContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            <!-- Dynamic JavaScript Injected Cards -->
+        </section>
+
+        <!-- Empty State View -->
+        <div id="emptyState" class="hidden text-center py-20 bg-marvel-cardBg/50 border border-marvel-border rounded-xl mt-4">
+            <i class="fa-solid fa-mask text-4xl text-gray-600 mb-3"></i>
+            <p class="text-gray-400 text-sm font-medium">No Marvel titles found matching your search or filters.</p>
+        </div>
+
+    </main>
+
+    <!-- Notification Toast Popup -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-marvel-cardBg border border-marvel-red text-white px-4 py-3 rounded-xl shadow-2xl transition transform translate-y-20 opacity-0 flex items-center gap-3 z-50">
+        <i class="fa-solid fa-circle-check text-marvel-red"></i>
+        <span id="toastMessage" class="text-xs font-medium"></span>
+    </div>
+
+    <script>
+        // Master Comprehensive Marvel Catalog across all Universes
+        const masterMarvelList = [
+            // --- MCU (Chronological) ---
+            { title: "Eyes of Wakanda", franchise: "MCU", type: "Series" },
+            { title: "Captain America: The First Avenger", franchise: "MCU", type: "Movie" },
+            { title: "Agent Carter", franchise: "MCU", type: "Series" },
+            { title: "Captain Marvel", franchise: "MCU", type: "Movie" },
+            { title: "Iron Man", franchise: "MCU", type: "Movie" },
+            { title: "Iron Man 2", franchise: "MCU", type: "Movie" },
+            { title: "The Incredible Hulk", franchise: "MCU", type: "Movie" },
+            { title: "A Funny Thing Happened on the Way to Thor's Hammer", franchise: "MCU", type: "Short / Special" },
+            { title: "Thor", franchise: "MCU", type: "Movie" },
+            { title: "The Consultant", franchise: "MCU", type: "Short / Special" },
+            { title: "The Avengers", franchise: "MCU", type: "Movie" },
+            { title: "Item 47", franchise: "MCU", type: "Short / Special" },
+            { title: "Thor: The Dark World", franchise: "MCU", type: "Movie" },
+            { title: "Iron Man 3", franchise: "MCU", type: "Movie" },
+            { title: "All Hail the King", franchise: "MCU", type: "Short / Special" },
+            { title: "Captain America: The Winter Soldier", franchise: "MCU", type: "Movie" },
+            { title: "Guardians of the Galaxy", franchise: "MCU", type: "Movie" },
+            { title: "Guardians of the Galaxy Vol. 2", franchise: "MCU", type: "Movie" },
+            { title: "I Am Groot season 1", franchise: "MCU", type: "Series" },
+            { title: "I Am Groot season 2", franchise: "MCU", type: "Series" },
+            { title: "Daredevil season 1", franchise: "MCU", type: "Series" },
+            { title: "Jessica Jones season 1", franchise: "MCU", type: "Series" },
+            { title: "Avengers: Age of Ultron", franchise: "MCU", type: "Movie" },
+            { title: "Ant-Man", franchise: "MCU", type: "Movie" },
+            { title: "Daredevil season 2", franchise: "MCU", type: "Series" },
+            { title: "Luke Cage season 1", franchise: "MCU", type: "Series" },
+            { title: "Iron Fist season 1", franchise: "MCU", type: "Series" },
+            { title: "The Defenders", franchise: "MCU", type: "Series" },
+            { title: "Captain America: Civil War", franchise: "MCU", type: "Movie" },
+            { title: "Black Widow", franchise: "MCU", type: "Movie" },
+            { title: "Black Panther", franchise: "MCU", type: "Movie" },
+            { title: "Spider-Man: Homecoming", franchise: "MCU", type: "Movie" },
+            { title: "The Punisher season 1", franchise: "MCU", type: "Series" },
+            { title: "Doctor Strange", franchise: "MCU", type: "Movie" },
+            { title: "Jessica Jones season 2", franchise: "MCU", type: "Series" },
+            { title: "Luke Cage season 2", franchise: "MCU", type: "Series" },
+            { title: "Iron Fist season 2", franchise: "MCU", type: "Series" },
+            { title: "Daredevil season 3", franchise: "MCU", type: "Series" },
+            { title: "Thor: Ragnarok", franchise: "MCU", type: "Movie" },
+            { title: "The Punisher season 2", franchise: "MCU", type: "Series" },
+            { title: "Jessica Jones season 3", franchise: "MCU", type: "Series" },
+            { title: "Ant-Man and the Wasp", franchise: "MCU", type: "Movie" },
+            { title: "Avengers: Infinity War", franchise: "MCU", type: "Movie" },
+            { title: "Avengers: Endgame", franchise: "MCU", type: "Movie" },
+            { title: "Loki season 1", franchise: "MCU", type: "Series" },
+            { title: "What If...? season 1", franchise: "MCU", type: "Series" },
+            { title: "Marvel Zombies", franchise: "MCU", type: "Series" },
+            { title: "WandaVision", franchise: "MCU", type: "Series" },
+            { title: "Shang-Chi and the Legend of the Ten Rings", franchise: "MCU", type: "Movie" },
+            { title: "The Falcon and the Winter Soldier", franchise: "MCU", type: "Series" },
+            { title: "Spider-Man: Far From Home", franchise: "MCU", type: "Movie" },
+            { title: "Eternals", franchise: "MCU", type: "Movie" },
+            { title: "Spider-Man: No Way Home", franchise: "MCU", type: "Movie" },
+            { title: "Doctor Strange in the Multiverse of Madness", franchise: "MCU", type: "Movie" },
+            { title: "Hawkeye", franchise: "MCU", type: "Series" },
+            { title: "Moon Knight", franchise: "MCU", type: "Series" },
+            { title: "Black Panther: Wakanda Forever", franchise: "MCU", type: "Movie" },
+            { title: "Echo", franchise: "MCU", type: "Series" },
+            { title: "She-Hulk: Attorney at Law", franchise: "MCU", type: "Series" },
+            { title: "Ms. Marvel", franchise: "MCU", type: "Series" },
+            { title: "Thor: Love and Thunder", franchise: "MCU", type: "Movie" },
+            { title: "Ironheart", franchise: "MCU", type: "Series" },
+            { title: "Werewolf by Night", franchise: "MCU", type: "Short / Special" },
+            { title: "The Guardians of the Galaxy Holiday Special", franchise: "MCU", type: "Short / Special" },
+            { title: "Ant-Man and the Wasp: Quantumania", franchise: "MCU", type: "Movie" },
+            { title: "Guardians of the Galaxy Vol. 3", franchise: "MCU", type: "Movie" },
+            { title: "Secret Invasion", franchise: "MCU", type: "Series" },
+            { title: "The Marvels", franchise: "MCU", type: "Movie" },
+            { title: "Loki season 2", franchise: "MCU", type: "Series" },
+            { title: "What If...? season 2", franchise: "MCU", type: "Series" },
+            { title: "Deadpool & Wolverine", franchise: "MCU", type: "Movie" },
+            { title: "Agatha All Along", franchise: "MCU", type: "Series" },
+            { title: "What If...? season 3", franchise: "MCU", type: "Series" },
+            { title: "Daredevil: Born Again season 1", franchise: "MCU", type: "Series" },
+            { title: "Captain America: Brave New World", franchise: "MCU", type: "Movie" },
+            { title: "Thunderbolts*", franchise: "MCU", type: "Movie" },
+            { title: "The Fantastic Four: First Steps", franchise: "MCU", type: "Movie" },
+            { title: "Wonder Man", franchise: "MCU", type: "Series" },
+            { title: "Daredevil: Born Again season 2", franchise: "MCU", type: "Series" },
+            { title: "VisionQuest", franchise: "MCU", type: "Series" },
+
+            // --- X-MEN UNIVERSE ---
+            { title: "X-Men (2000)", franchise: "X-Men", type: "Movie" },
+            { title: "X2: X-Men United (2003)", franchise: "X-Men", type: "Movie" },
+            { title: "X-Men: The Last Stand (2006)", franchise: "X-Men", type: "Movie" },
+            { title: "X-Men Origins: Wolverine (2009)", franchise: "X-Men", type: "Movie" },
+            { title: "X-Men: First Class (2011)", franchise: "X-Men", type: "Movie" },
+            { title: "The Wolverine (2013)", franchise: "X-Men", type: "Movie" },
+            { title: "X-Men: Days of Future Past (2014)", franchise: "X-Men", type: "Movie" },
+            { title: "Deadpool (2016)", franchise: "X-Men", type: "Movie" },
+            { title: "X-Men: Apocalypse (2016)", franchise: "X-Men", type: "Movie" },
+            { title: "Logan (2017)", franchise: "X-Men", type: "Movie" },
+            { title: "Deadpool 2 (2018)", franchise: "X-Men", type: "Movie" },
+            { title: "X-Men: Dark Phoenix (2019)", franchise: "X-Men", type: "Movie" },
+            { title: "The New Mutants (2020)", franchise: "X-Men", type: "Movie" },
+            { title: "Legion (Seasons 1-3)", franchise: "X-Men", type: "Series" },
+            { title: "The Gifted (Seasons 1-2)", franchise: "X-Men", type: "Series" },
+
+            // --- SPIDER-VERSE & SONY'S SPIDER-MAN UNIVERSE (SSU) ---
+            { title: "Spider-Man (2002)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Spider-Man 2 (2004)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Spider-Man 3 (2007)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "The Amazing Spider-Man (2012)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "The Amazing Spider-Man 2 (2014)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Venom (2018)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Spider-Man: Into the Spider-Verse (2018)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Venom: Let There Be Carnage (2021)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Morbius (2022)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Spider-Man: Across the Spider-Verse (2023)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Madame Web (2024)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Venom: The Last Dance (2024)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Kraven the Hunter (2024)", franchise: "Spider-Verse / SSU", type: "Movie" },
+            { title: "Spider-Man: Beyond the Spider-Verse", franchise: "Spider-Verse / SSU", type: "Movie" },
+
+            // --- FANTASTIC FOUR ---
+            { title: "Fantastic Four (2005)", franchise: "Fantastic Four", type: "Movie" },
+            { title: "Fantastic Four: Rise of the Silver Surfer (2007)", franchise: "Fantastic Four", type: "Movie" },
+            { title: "Fant4stic (2015)", franchise: "Fantastic Four", type: "Movie" },
+
+            // --- LEGACY CLASSICS ---
+            { title: "Howard the Duck (1986)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "The Punisher (1989)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Blade (1998)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Blade II (2002)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Daredevil (2003)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Hulk (2003)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "The Punisher (2004)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Blade: Trinity (2004)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Elektra (2005)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Ghost Rider (2007)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Punisher: War Zone (2008)", franchise: "Legacy Marvel", type: "Movie" },
+            { title: "Ghost Rider: Spirit of Vengeance (2011)", franchise: "Legacy Marvel", type: "Movie" }
+        ];
+
+        let marvelData = [];
+        let activeFranchise = 'all';
+        let currentStatusFilter = 'all';
+        let searchQuery = '';
+
+        // Initialize state on page load
+        window.onload = function() {
+            loadData();
+            renderList();
+            updateStats();
+        };
+
+        // Load data from window.localStorage or generate initial dataset
+        function loadData() {
+            const saved = localStorage.getItem('ultimate_marvel_watchlist');
+            if (saved) {
+                try {
+                    marvelData = JSON.parse(saved);
+                } catch (e) {
+                    console.error("Failed parsing localStorage", e);
+                    initDefaultData();
+                }
+            } else {
+                initDefaultData();
+            }
+        }
+
+        function initDefaultData() {
+            marvelData = masterMarvelList.map((item, index) => ({
+                id: index + 1,
+                title: item.title,
+                franchise: item.franchise,
+                type: item.type,
+                watched: false
+            }));
+            saveData();
+        }
+
+        function saveData() {
+            localStorage.setItem('ultimate_marvel_watchlist', JSON.stringify(marvelData));
+        }
+
+        // Render checklist elements based on selected Tab, Search & Filter
+        function renderList() {
+            const container = document.getElementById('checklistContainer');
+            const emptyState = document.getElementById('emptyState');
+            container.innerHTML = '';
+
+            const filtered = getFilteredItems();
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = `item-card bg-marvel-cardBg border border-marvel-border rounded-xl p-3.5 flex items-center justify-between cursor-pointer select-none ${item.watched ? 'watched' : ''}`;
+                
+                card.onclick = (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        toggleWatchItem(item.id);
+                    }
+                };
+
+                let badgeColor = 'bg-gray-800 text-gray-300 border-gray-700';
+                if (item.franchise === 'MCU') badgeColor = 'bg-red-950/80 text-red-300 border-red-900/50';
+                if (item.franchise === 'X-Men') badgeColor = 'bg-amber-950/80 text-amber-300 border-amber-900/50';
+                if (item.franchise === 'Spider-Verse / SSU') badgeColor = 'bg-blue-950/80 text-blue-300 border-blue-900/50';
+                if (item.franchise === 'Fantastic Four') badgeColor = 'bg-purple-950/80 text-purple-300 border-purple-900/50';
+                if (item.franchise === 'Legacy Marvel') badgeColor = 'bg-emerald-950/80 text-emerald-300 border-emerald-900/50';
+
+                card.innerHTML = `
+                    <div class="flex items-center gap-3 pr-2 overflow-hidden">
+                        <input 
+                            type="checkbox" 
+                            class="custom-checkbox" 
+                            ${item.watched ? 'checked' : ''} 
+                            onchange="toggleWatchItem(${item.id})"
+                        >
+                        <div class="flex flex-col min-w-0">
+                            <span class="text-[10px] text-gray-500 font-mono flex items-center gap-1.5">
+                                <span>#${String(item.id).padStart(3, '0')}</span> • <span>${item.franchise}</span>
+                            </span>
+                            <span class="text-sm font-medium ${item.watched ? 'line-through text-gray-500' : 'text-gray-100'} truncate">
+                                ${item.title}
+                            </span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor} font-semibold flex-shrink-0">
+                        ${item.type}
+                    </span>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        function getFilteredItems() {
+            return marvelData.filter(item => {
+                const matchesFranchise = activeFranchise === 'all' ? true : item.franchise === activeFranchise;
+                
+                const matchesStatus = 
+                    currentStatusFilter === 'all' ? true :
+                    currentStatusFilter === 'watched' ? item.watched :
+                    !item.watched;
+
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                      item.franchise.toLowerCase().includes(searchQuery.toLowerCase());
+
+                return matchesFranchise && matchesStatus && matchesSearch;
+            });
+        }
+
+        // Toggle watched item
+        function toggleWatchItem(id) {
+            const index = marvelData.findIndex(item => item.id === id);
+            if (index !== -1) {
+                marvelData[index].watched = !marvelData[index].watched;
+                saveData();
+                renderList();
+                updateStats();
+            }
+        }
+
+        // Calculate and update dashboard metrics
+        function updateStats() {
+            const total = marvelData.length;
+            const watched = marvelData.filter(i => i.watched).length;
+            const percentage = total > 0 ? Math.round((watched / total) * 100) : 0;
+
+            document.getElementById('percentText').innerText = `${percentage}%`;
+            document.getElementById('statsSubtitle').innerText = `${watched} of ${total} total marvel titles watched`;
+            document.getElementById('progressBar').style.width = `${percentage}%`;
+
+            // Category Stats
+            const updateCat = (franchise, elId) => {
+                const catTotal = marvelData.filter(i => i.franchise === franchise).length;
+                const catWatched = marvelData.filter(i => i.franchise === franchise && i.watched).length;
+                document.getElementById(elId).innerText = `${catWatched} / ${catTotal}`;
+            };
+
+            updateCat('MCU', 'statMCU');
+            updateCat('X-Men', 'statXMen');
+            updateCat('Spider-Verse / SSU', 'statSpider');
+            updateCat('Fantastic Four', 'statF4');
+            updateCat('Legacy Marvel', 'statLegacy');
+        }
+
+        // Franchise tab navigation
+        function setFranchise(franchise) {
+            activeFranchise = franchise;
+            
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            const activeBtn = document.getElementById(`tab-${franchise}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            renderList();
+        }
+
+        // Watched status filter tab
+        function setFilter(status) {
+            currentStatusFilter = status;
+            ['all', 'watched', 'unwatched'].forEach(f => {
+                const btn = document.getElementById(`filter-${f}`);
+                if (f === status) {
+                    btn.className = "px-3 py-1.5 rounded-md text-xs font-medium transition bg-marvel-red text-white";
+                } else {
+                    btn.className = "px-3 py-1.5 rounded-md text-xs font-medium text-gray-400 hover:text-white transition";
+                }
+            });
+            renderList();
+        }
+
+        // Real-time search handler
+        function handleSearch() {
+            searchQuery = document.getElementById('searchInput').value;
+            renderList();
+        }
+
+        // Context-aware batch Select All / Unselect All
+        function selectAllVisible(status) {
+            const visibleItems = getFilteredItems();
+            if (visibleItems.length === 0) {
+                showToast("No items visible to update!");
+                return;
+            }
+
+            const visibleIds = new Set(visibleItems.map(item => item.id));
+            
+            marvelData.forEach(item => {
+                if (visibleIds.has(item.id)) {
+                    item.watched = status;
+                }
+            });
+
+            saveData();
+            renderList();
+            updateStats();
+            showToast(status ? `Marked ${visibleItems.length} titles as watched!` : `Unchecked ${visibleItems.length} titles!`);
+        }
+
+        // Export data backup JSON
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(marvelData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `Marvel_Multiverse_Watchlist_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            showToast("Watchlist JSON backup exported!");
+        }
+
+        // Import data restore JSON
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        marvelData = importedData;
+                        saveData();
+                        renderList();
+                        updateStats();
+                        showToast("Multiverse Watchlist imported successfully!");
+                    } else {
+                        showToast("Invalid JSON backup structure.");
+                    }
+                } catch (err) {
+                    showToast("Failed to parse JSON file.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Reset progress confirmation
+        function confirmReset() {
+            if (confirm("Are you sure you want to reset all watch progress across all Marvel franchises?")) {
+                marvelData.forEach(item => item.watched = false);
+                saveData();
+                renderList();
+                updateStats();
+                showToast("All progress reset.");
+            }
+        }
+
+        // Toast notifications
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.innerText = message;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
