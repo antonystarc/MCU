@@ -1,0 +1,43 @@
+{
+  "name": "Marvel Multiverse Watchlist",
+  "short_name": "Marvel",
+  "description": "Track your Marvel universe watchlist across MCU, X-Men, Spider-Verse, Fantastic Four & Legacy Classics.",
+  "start_url": "./MCU.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b0c10",
+  "theme_color": "#e62429",
+  "lang": "en",
+  "categories": ["entertainment", "lifestyle"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "MCU",
+      "short_name": "MCU",
+      "description": "View MCU titles",
+      "url": "./MCU.html#MCU",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Unwatched",
+      "short_name": "Unwatched",
+      "description": "View unwatched titles",
+      "url": "./MCU.html#unwatched",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

@@ -4,7 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ultimate Marvel Universe Watchlist</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' fill='%23e62429' rx='5'/><text x='16' y='24' font-family='Arial Black,Arial,sans-serif' font-size='22' font-weight='900' fill='white' text-anchor='middle'>M</text></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Theme colour for Android Chrome address bar -->
+    <meta name="theme-color" content="#e62429">
+
+    <!-- iOS PWA support -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Marvel">
+    <link rel="apple-touch-icon" href="icons/icon.svg">
+
+    <!-- Splash / tile colours for older browsers -->
+    <meta name="msapplication-TileColor" content="#e62429">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Marvel Watchlist"><rect width='32' height='32' fill='%23e62429' rx='5'/><text x='16' y='24' font-family='Arial Black,Arial,sans-serif' font-size='22' font-weight='900' fill='white' text-anchor='middle'>M</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -672,6 +688,17 @@
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
             }, 3000);
+        }
+    </script>
+
+    <!-- PWA: Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('[SW] Registered — scope:', reg.scope))
+                    .catch(err => console.warn('[SW] Registration failed:', err));
+            });
         }
     </script>
 </body>
