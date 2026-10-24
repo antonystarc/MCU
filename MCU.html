@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -276,6 +276,19 @@
         </div>
 
     </main>
+
+    <!-- Footer -->
+    <footer class="max-w-6xl mx-auto px-4 py-8 mt-10 border-t border-marvel-border text-center">
+        <p class="text-xs text-gray-500">
+            Made with <span class="text-marvel-red">&#10084;</span> by
+            <a href="https://www.instagram.com/sanjaygkrish" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center gap-1.5 text-gray-300 hover:text-pink-400 font-medium transition-colors duration-200">
+                <i class="fa-brands fa-instagram text-pink-400"></i>
+                @sanjaygkrish
+            </a>
+        </p>
+    </footer>
+
 
     <!-- Notification Toast Popup -->
     <div id="toast" class="fixed bottom-5 right-5 bg-marvel-cardBg border border-marvel-red text-white px-4 py-3 rounded-xl shadow-2xl transition transform translate-y-20 opacity-0 flex items-center gap-3 z-50">
@@ -696,7 +709,7 @@
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('[SW] Registered — scope:', reg.scope))
+                    .then(reg => console.log('[SW] Registered ï¿½ scope:', reg.scope))
                     .catch(err => console.warn('[SW] Registration failed:', err));
             });
         }
